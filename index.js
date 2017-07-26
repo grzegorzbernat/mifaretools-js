@@ -82,10 +82,12 @@ function write(data, callback) {
     var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
 
     fs.writeFile(fileName, buffer, function (err) {
+        console.log("fileName " + fileName);
+        console.log("buffer " + buffer);
+
         if (err) {
             callback(err);
         }
-
         command.stdout.on('data', function (data) {
             process.stdout.write(data + "");
             result += data;
@@ -96,11 +98,15 @@ function write(data, callback) {
         });
 
         command.on('close', function (code) {
+            console.log("koniec");
             if (result.indexOf('Found') === -1) {
                 errorMessage = "No TAG found.";
+                console.log("errorMessage " + errorMessage);
             }
 
             if (code === 0 && errorMessage.length === 0) {
+                console.log("nie ma bledow ");
+
                 callback(null);
                 fs.unlinkSync(fileName);
             } else {
