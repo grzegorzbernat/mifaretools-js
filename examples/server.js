@@ -8,7 +8,7 @@ console.log("Listening for new clients on port 8080");
 var timer;
 
 app.get('/', function(request, response) {
-    response.send('Reading constantly');
+    response.send('Reading constantly...');
     timer = setInterval(function() {
         mifaretools.read(function(err, uid, data) {
             if (uid != undefined && uid != null) {
@@ -36,6 +36,26 @@ app.get('/format', function(request, response) {
           console.error(new Error(err.replace(/\n$/, "")));
         } else {
             console.log("Format completed");
+        }
+    });
+});
+
+
+app.get('/write', function(request, response) {
+    clearInterval(timer);
+    response.send('Writing...');
+
+    var message = [
+        ndef.textRecord("hello, world")
+    ];
+
+    var bytes = ndef.encodeMessage(message);
+
+    mifaretools.write(bytes, function(err) {
+        if (err) {
+            console.error(new Error(err.replace(/\n$/, "")));
+        } else {
+            console.log("Writing completed");
         }
     });
 });
