@@ -8,10 +8,9 @@ function getUID(text) {
     if (result != undefined && result != null) {
         return result[1];
     }
-	else
-	{
-		return undefined;
-	}
+    else {
+        return undefined;
+    }
 }
 
 function read(callback) {
@@ -25,21 +24,21 @@ function read(callback) {
     var uid = '';
     var errorMessage = '';
 
-    command.stdout.on('data', function(data) {
+    command.stdout.on('data', function (data) {
         result += data.toString();
     });
 
-    command.stderr.on('data', function(data) {
+    command.stderr.on('data', function (data) {
         errorMessage += data.toString();
     });
 
-    command.on('close', function(code) {
+    command.on('close', function (code) {
         if (result.indexOf('Found') === -1) {
             errorMessage = "No TAG found.";
         }
         uid = getUID(result);
         if (code === 0 && errorMessage.length === 0) {
-            fs.readFile(fileName, function(err, data) {
+            fs.readFile(fileName, function (err, data) {
                 callback(err, uid, data);
             });
         } else {
@@ -54,15 +53,15 @@ function format(callback) {
     var spawn = require('child_process').spawn;
     var command = spawn('mifare-classic-format', ['-y']);
 
-    command.stdout.on('data', function(data) {
+    command.stdout.on('data', function (data) {
         process.stdout.write(data + "");
     });
-    
-    command.stderr.on('data', function(data) {
+
+    command.stderr.on('data', function (data) {
         errorMessage += data;
     });
 
-    command.on('close', function(code) {
+    command.on('close', function (code) {
         if (code === 0) {
             callback(null);
         } else {
