@@ -8,6 +8,10 @@ function getUID(text) {
     if (result != undefined && result != null) {
         return result[1];
     }
+	else
+	{
+		return undefined;
+	}
 }
 
 function read(callback) {

@@ -14,10 +14,11 @@ app.get('/', function(request, response) {
                 console.log("UID: " + uid);
             }
             if (err != undefined && err != null) {
-                console.error(new Error(err.replace(/\n$/, "")));
+				console.log("Error: " + err.replace(/\n$/, ""));
+              //  console.log(new Error(err.replace(/\n$/, "")));
             }
             if (data != undefined && data != null) {
-                var message = ndef.decodeMessage(data.toJSON());
+                var message = ndef.decodeMessage(data.toJSON().data);
                 console.log("Found NDEF message with " + message.length +
                     (message.length === 1 ? " record" : " records"));
                 console.log(ndef.stringify(message));
