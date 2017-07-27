@@ -83,18 +83,24 @@ function write(data, callback) {
 
     fs.writeFile(fileName, buffer, function (err) {
         console.log("fileName " + fileName);
-        console.log("buffer " + buffer);
+        //console.log("buffer " + buffer);
 
         if (err) {
             callback(err);
         }
+        console.log("Jestem? ");
+
         command.stdout.on('data', function (data) {
             process.stdout.write(data + "");
             result += data;
+            console.log("data? ");
+
         });
 
         command.stderr.on('data', function (data) {
             errorMessage += data;
+            console.log("error? ");
+
         });
 
         command.on('close', function (code) {
