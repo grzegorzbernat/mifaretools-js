@@ -81,26 +81,6 @@ function callback(number) {
     }
 };
 
-function run(cmd, callback) {
-    var spawn = require('child_process').spawn;
-    var command = spawn(cmd);
-    var result = '';
-    command.stdout.on('data', function(data) {
-        result += data.toString();
-    });
-    command.stderr.on('data', function (data) {
-        result += data.toString();
-    });
-    command.on('close', function(code) {
-        return callback(result);
-    });
-}
-
-app.get('/inic', function (request, response) {
-    response.send('aaa...');
-    run("mifare-classic-write-ndef -y -i hello.mfd", function(result) { console.log(result) });
-});
-
 app.get('/increment', function (request, response) {
     response.send('Incrementing...');
     var payload;
