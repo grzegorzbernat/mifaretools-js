@@ -67,6 +67,10 @@ function format(callback) {
     });
 }
 
+function defaultCallback(err) {
+    if (err) { throw err; }
+}
+
 function write(data, callback) {
 
     var errorMessage = '';
@@ -78,10 +82,14 @@ function write(data, callback) {
     var fileName = temp.path({
         suffix: '.bin'
     });
+		
 
-    var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
+	if (!callback) { callback = defaultCallback; }
 
     fs.writeFile(fileName, buffer, function (err) {
+		
+		var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
+
         if (err) {
             callback(err);
         }
@@ -96,10 +104,8 @@ function write(data, callback) {
         });
 
         command.on('close', function (code) {
-            console.log("Writing finished");
             if (result.indexOf('Found') === -1) {
                 errorMessage = "No TAG found.";
-                console.log("errorMessage " + errorMessage);
             }
 
             if (code === 0 && errorMessage.length === 0) {

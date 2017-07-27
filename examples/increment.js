@@ -11,28 +11,20 @@ function operationFailed(err) {
     console.error(new Error(err.replace(/\n$/, "")));
 };
 
-
 app.get('/writeInitial', function (request, response) {
     response.send('Writing...');
-
+	console.log("Writing");
+	
     var message = [
         ndef.textRecord("0")
     ];
 
     var bytes = ndef.encodeMessage(message);
 
-    var timer = setTimeout(function() {
-        timer = null;
-        operationFailed("Writing failed");
-    }, 3000);
-
     mifaretools.write(bytes, function (err) {
         if (err) {
             console.error(new Error(err.replace(/\n$/, "")));
         } else {
-            if (timer) {
-                clearTimeout(timer);
-            }
             console.log("Writing completed");
         }
     });
