@@ -1,7 +1,12 @@
 var fs = require('fs');
-var fileName = 'ndef.bin';
 var ndef = require('ndef');
+var spawn = require('child_process').spawn;
 
+/**
+ * Function to get UID number from result of reading tag.
+ * @param data result of read function
+ * @returns tag UID
+ */
 function getUID(data) {
     var regex = /^.*? with UID ([a-f0-9]+)/; //regex expression to extract UID from string like "Found Mifare Classic 1k with UID 564ecb50."
     var result = data.match(regex);
@@ -10,8 +15,13 @@ function getUID(data) {
     }
 }
 
+/**
+ * Function to read mifare classic tags
+ * callback(error, uid, data) if successful returns uid number and raw tag data
+ * callback(error, uid) when tag has no content
+ * @param callback function
+ */
 function read(callback) {
-    var spawn = require('child_process').spawn;
     var temp = require("temp").track();
     var fileName = temp.path({
         suffix: '.bin'
@@ -39,15 +49,18 @@ function read(callback) {
                 callback(err, uid, data);
             });
         } else {
-            callback(errorMessage, uid);
+            callback(errorMessage.replace(/\n$/, ""), uid);
         }
         fs.unlinkSync(fileName);
     });
 }
 
+/**
+ * Function to format tag content
+ * @param callback null or error message
+ */
 function format(callback) {
     var errorMessage = '';
-    var spawn = require('child_process').spawn;
     var command = spawn('mifare-classic-format', ['-y']);
 
     command.stdout.on('data', function (data) {
@@ -62,19 +75,18 @@ function format(callback) {
         if (code === 0) {
             callback(null);
         } else {
-            callback(errorMessage);
+            callback(errorMessage.replace(/\n$/, ""));
         }
     });
 }
 
-function defaultCallback(err) {
-    if (err) { throw err; }
-}
-
+/**
+ * Function to write NDEF contant into mifare classic tag.
+ * @param data byte array of ndef data
+ * @param callback function
+ */
 function write(data, callback) {
-
     var errorMessage = '';
-    var spawn = require('child_process').spawn;
     var result = "";
     var buffer = Buffer(data);
 
@@ -82,13 +94,10 @@ function write(data, callback) {
     var fileName = temp.path({
         suffix: '.bin'
     });
-		
-
-	if (!callback) { callback = defaultCallback; }
 
     fs.writeFile(fileName, buffer, function (err) {
-		
-		var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
+
+        var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
 
         if (err) {
             callback(err);
@@ -112,12 +121,11 @@ function write(data, callback) {
                 callback(null);
                 fs.unlinkSync(fileName);
             } else {
-                callback(errorMessage);
+                callback(errorMessage.replace(/\n$/, ""));
             }
         });
     });
 }
-
 
 module.exports = {
     read: read,
