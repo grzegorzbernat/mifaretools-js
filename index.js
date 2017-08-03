@@ -27,9 +27,14 @@ function read(callback) {
         suffix: '.bin'
     });
     var command = spawn('mifare-classic-read-ndef', ['-y', '-o', fileName]);
+
     var result = '';
     var uid = '';
     var errorMessage = '';
+
+    command.on('error', function (err) {
+        errorMessage = "Cannot spawn program. Are you sure that libfreefare is installed?";
+    });
 
     command.stdout.on('data', function (data) {
         result += data.toString();
@@ -40,18 +45,23 @@ function read(callback) {
     });
 
     command.on('close', function (code) {
-        if (result.indexOf('Found') === -1) {
-            errorMessage = "No TAG found.";
+        if (errorMessage.length > 0) {
+            callback(errorMessage);
         }
-        uid = getUID(result);
-        if (code === 0 && errorMessage.length === 0) {
-            fs.readFile(fileName, function (err, data) {
-                callback(err, uid, data);
-            });
-        } else {
-            callback(errorMessage.replace(/\n$/, ""), uid);
+        else {
+            if (result.indexOf('Found') === -1) {
+                errorMessage = "No TAG found.";
+            }
+            uid = getUID(result);
+            if (code === 0 && errorMessage.length === 0) {
+                fs.readFile(fileName, function (err, data) {
+                    callback(err, uid, data);
+                });
+            } else {
+                callback(errorMessage.replace(/\n$/, ""), uid);
+            }
+            fs.unlinkSync(fileName);
         }
-        fs.unlinkSync(fileName);
     });
 }
 
@@ -62,6 +72,10 @@ function read(callback) {
 function format(callback) {
     var errorMessage = '';
     var command = spawn('mifare-classic-format', ['-y']);
+
+    command.on('error', function (err) {
+        errorMessage = "Cannot spawn program. Are you sure that libfreefare is installed?";
+    });
 
     command.stdout.on('data', function (data) {
         process.stdout.write(data + "");
@@ -99,6 +113,11 @@ function write(data, callback) {
 
         var command = spawn('mifare-classic-write-ndef', ['-y', '-i', fileName]);
 
+        command.on('error', function (err) {
+            errorMessage = "Cannot spawn program. Are you sure that libfreefare is installed?";
+        });
+
+
         if (err) {
             callback(err);
         }
@@ -113,15 +132,20 @@ function write(data, callback) {
         });
 
         command.on('close', function (code) {
-            if (result.indexOf('Found') === -1) {
-                errorMessage = "No TAG found.";
+            if (errorMessage.length > 0) {
+                callback(errorMessage);
             }
+            else {
+                if (result.indexOf('Found') === -1) {
+                    errorMessage = "No TAG found.";
+                }
 
-            if (code === 0 && errorMessage.length === 0) {
-                callback(null);
-                fs.unlinkSync(fileName);
-            } else {
-                callback(errorMessage.replace(/\n$/, ""));
+                if (code === 0 && errorMessage.length === 0) {
+                    callback(null);
+                    fs.unlinkSync(fileName);
+                } else {
+                    callback(errorMessage.replace(/\n$/, ""));
+                }
             }
         });
     });
