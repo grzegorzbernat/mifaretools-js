@@ -1,6 +1,6 @@
 {
     "name": "@greggy/mifaretools",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Module to read and write Mifare Classic tags.",
     "main": "index.js",
     "scripts": {
