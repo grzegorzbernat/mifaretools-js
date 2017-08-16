@@ -46,7 +46,13 @@ function read(callback) {
 
     command.on('close', function (code) {
         if (errorMessage.length > 0) {
-            callback(errorMessage);
+            try {
+                uid = getUID(result);
+            } catch (e) {
+                callback(errorMessage);
+            }
+
+            callback(errorMessage.replace(/\n$/, ""), uid);
         }
         else {
             if (result.indexOf('Found') === -1) {
